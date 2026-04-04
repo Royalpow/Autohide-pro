@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { shopifyApi, LATEST_API_VERSION, DeliveryMethod } from "@shopify/shopify-api";
+import { shopifyApi, LATEST_API_VERSION, DeliveryMethod, sessionStorage } from "@shopify/shopify-api";
 import db from "./db/database.js";
 import webhookRoutes from "./routes/webhooks.js";
 import { handleInventoryUpdate } from "./controllers/inventoryController.js";
@@ -24,7 +24,7 @@ const shopify = shopifyApi({
   hostName: process.env.HOST.replace("https://", ""),
   apiVersion: LATEST_API_VERSION,
   isEmbeddedApp: false,
-  sessionStorage: new shopifyApi.session.CustomSessionStorage({
+  sessionStorage: new sessionStorage.CustomSessionStorage({
     storeCallback: async (session) => {
       return new Promise((resolve) => {
         db.run(
@@ -42,9 +42,8 @@ const shopify = shopifyApi({
           [id],
           (err, row) => {
             if (!row) return resolve(undefined);
-
             resolve(
-              new shopifyApi.session.Session({
+              new sessionStorage.Session({
                 id,
                 shop: row.shop_domain,
                 state: "",
