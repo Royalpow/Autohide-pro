@@ -6,6 +6,7 @@ import db from "./db/database.js";
 import webhookRoutes from "./routes/webhooks.js";
 import { handleInventoryUpdate } from "./controllers/inventoryController.js";
 
+// Destructure Shopify API from CommonJS default import
 const { shopifyApi, LATEST_API_VERSION, DeliveryMethod, sessionStorage } = pkg;
 
 dotenv.config();
