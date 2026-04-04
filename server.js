@@ -1,10 +1,12 @@
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { shopifyApi, LATEST_API_VERSION, DeliveryMethod, sessionStorage } from "@shopify/shopify-api";
+import pkg from "@shopify/shopify-api";
 import db from "./db/database.js";
 import webhookRoutes from "./routes/webhooks.js";
 import { handleInventoryUpdate } from "./controllers/inventoryController.js";
+
+const { shopifyApi, LATEST_API_VERSION, DeliveryMethod, sessionStorage } = pkg;
 
 dotenv.config();
 
@@ -42,6 +44,7 @@ const shopify = shopifyApi({
           [id],
           (err, row) => {
             if (!row) return resolve(undefined);
+
             resolve(
               new sessionStorage.Session({
                 id,
@@ -92,7 +95,6 @@ app.get("/auth/callback", async (req, res) => {
     rawResponse: res,
   });
 
-  // Register inventory webhook
   await shopify.webhooks.register({
     session,
     topic: "INVENTORY_LEVELS_UPDATE",
