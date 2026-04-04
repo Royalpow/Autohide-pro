@@ -13,7 +13,7 @@
  *  - Node 20+ (Render uses Node 22)
  *  - Shopify API v10 (no default export)
  *  - ESM-only import syntax
- ************************************************************/
+ ***********************************************************/
 
 import express from "express";
 import dotenv from "dotenv";
