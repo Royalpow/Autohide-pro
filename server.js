@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import { shopifyApi, LATEST_API_VERSION, DeliveryMethod } from "@shopify/shopify-api";
 import db from "./db/database.js";
+import webhookRoutes from "./routes/webhooks.js";
 import { handleInventoryUpdate } from "./controllers/inventoryController.js";
 
 dotenv.config();
@@ -22,7 +23,7 @@ const shopify = shopifyApi({
   scopes: process.env.SCOPES.split(","),
   hostName: process.env.HOST.replace("https://", ""),
   apiVersion: LATEST_API_VERSION,
-  isEmbeddedApp: false, // safer for custom apps
+  isEmbeddedApp: false,
   sessionStorage: new shopifyApi.session.CustomSessionStorage({
     storeCallback: async (session) => {
       return new Promise((resolve) => {
@@ -33,6 +34,7 @@ const shopify = shopifyApi({
         );
       });
     },
+
     loadCallback: async (id) => {
       return new Promise((resolve) => {
         db.get(
@@ -40,6 +42,7 @@ const shopify = shopifyApi({
           [id],
           (err, row) => {
             if (!row) return resolve(undefined);
+
             resolve(
               new shopifyApi.session.Session({
                 id,
@@ -53,6 +56,7 @@ const shopify = shopifyApi({
         );
       });
     },
+
     deleteCallback: async (id) => {
       return new Promise((resolve) => {
         db.run(
@@ -101,22 +105,9 @@ app.get("/auth/callback", async (req, res) => {
 });
 
 // -------------------------------
-// 4. Webhook Endpoint
+// 4. Webhook Routes
 // -------------------------------
-app.post("/webhooks/inventory", async (req, res) => {
-  try {
-    const shop = req.headers["x-shopify-shop-domain"];
-    const topic = req.headers["x-shopify-topic"];
-    const body = req.body.toString();
-
-    await handleInventoryUpdate(topic, shop, body);
-
-    res.status(200).send("OK");
-  } catch (err) {
-    console.error("Webhook error:", err);
-    res.status(500).send("Error");
-  }
-});
+app.use("/webhooks", webhookRoutes);
 
 // -------------------------------
 // 5. Frontend Route
