@@ -14,8 +14,6 @@
  *  - Shopify API v10 (no default export)
  *  - ESM-only import syntax
  ***********************************************************/
-import pkg from "@shopify/shopify-api/package.json" with { type: "json" };
-console.log("Render installed Shopify API version:", pkg.version);
 import express from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
